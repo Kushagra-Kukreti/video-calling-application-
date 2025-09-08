@@ -38,6 +38,10 @@ io.on("connection",(socket)=>{
      io.to(to).emit("receive-negotiation-answer",{from:socket.id,ans})
   })
 
+  socket.on("end-call",({from})=>{
+    io.emit("call-ended",{from});
+  })
+
 
   console.log("Connected to socket server",socket.id)
   
@@ -87,5 +91,34 @@ The WebRTC state machine (simplified)
 "have-remote-offer" → you got an offer, need to create/send answer.
 
 After the offer/answer exchange, the peer connection goes back to "stable".
+
+
+
+
+
+
+FEATURE LIST:::
+
+Core 1-on-1 call flow (stabilize) — Must-have - done
+
+Camera & mic toggles (UX polish) — Easy - done 
+
+Proper End Call / Leave Room (clean disconnect) — Easy → Medium
+
+Placeholders, avatars, initials, connection states — Easy
+
+Text chat + DataChannel file transfer — Medium
+
+Screen sharing (single user) — Medium
+
+Reconnect / reconnection robustness (ICE restarts, signaling recovery) — Medium
+
+Multi-user (mesh) gallery view — Hard
+
+TURN server & NAT traversal hardening — Hard (infra)
+
+Recording (local & server-side) — Hard
+
+UX extras: reactions, raise hand, noise suppression, low-bandwidth mode — Medium-Hard
 
 */
