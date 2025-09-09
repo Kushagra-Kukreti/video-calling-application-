@@ -1,109 +1,31 @@
-import { useEffect, useState } from "react";
-import { useSocket } from "../context/Socket";
+import { useEffect } from "react";
 import { peer } from "../../../server/service/peerService";
-import { useNavigate } from "react-router-dom";
+import { useVideo } from "../context/Video";
+import { useSocket } from "../context/Socket";
 
 export const Room = () => {
-  const { socket } = useSocket();
-  const [remoteSocketId, setRemoteSocketId] = useState(null);
-  const [myStream, setMyStream] = useState();
-  const [otherUserStream, setOtherUserStream] = useState(null);
-  const [micState, setMicState] = useState(false);
-  const [cameraState, setCameraState] = useState(false);
-  const navigate = useNavigate();
-
-  const handleJoin = (data) => {
-    console.log("Your data from backend", data);
-  };
-
-  const userJoined = (data) => {
-    console.log("Joined user info", data);
-    setRemoteSocketId(data.id);
-  };
-
-  const handleCallClick = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    });
-    const offer = await peer.getOffer();
-    socket.emit("start-call", { to: remoteSocketId, offer });
-    setMyStream(stream);
-  };
-
-  const handleIncommingCall = async ({ from, offer }) => {
-    console.log("incomming call", from, offer);
-    setRemoteSocketId(from);
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    });
-    setMyStream(stream);
-    const answer = await peer.getAnswer(offer);
-    socket.emit("answer-call", { to: from, answer });
-  };
-
-  const sendStream = () => {
-    myStream
-      .getTracks()
-      .forEach((track) => peer.peerConnection.addTrack(track, myStream));
-  };
-
-  const handleAnswerCall = async ({ from, answer }) => {
-    if (peer.peerConnection.signalingState === "have-local-offer")
-      await peer.setRemoteDescription(answer);
-    console.log("answer call", from, answer);
-  };
-
-  const handleNegotiationNeeded = async () => {
-    console.log("negotiation initiated");
-    const offer = await peer.getOffer();
-    socket.emit("start-negotiation", { to: remoteSocketId, offer });
-  };
-
-  const handleIncomingNegotiation = async ({ from, offer }) => {
-    const ans = await peer.getAnswer(offer);
-    socket.emit("answer-negotiation", { to: from, ans });
-  };
-
-  const handleRecievingNegoAns = async ({ ans }) => {
-    if (peer.peerConnection.signalingState === "have-local-offer")
-      await peer.setRemoteDescription(ans);
-  };
-
-  const handleEndCall = () => {
-    //turn off streams
-    myStream.getTracks().forEach((track) => track.stop()); // to close the stream and camera
-    peer.peerConnection.close(); // to close the connection
-    //clear stream states
-    setMyStream(null);
-    setOtherUserStream(null);
-    //socket off
-    socket.emit("end-call", { from: socket.id });
-    socket.disconnect();
-    navigate("/");
-  };
-
-  const handleCallEnded = ({ from }) => {
-    setOtherUserStream(null);
-    console.log(from, "ended the call");
-  };
-
-  const handleToggle = (resource) => {
-    if (resource === "camera") {
-      const videoTracks = myStream.getVideoTracks()[0];
-      if (videoTracks) {
-        videoTracks.enabled = !videoTracks.enabled;
-        setCameraState(videoTracks.enabled);
-      }
-    } else if (resource === "mic") {
-      const audioTracks = myStream.getAudioTracks()[0];
-      if (audioTracks) {
-        audioTracks.enabled = !audioTracks.enabled;
-        setMicState(audioTracks.enabled);
-      }
-    }
-  };
+  const {
+        remoteSocketId,
+        myStream,
+        otherUserStream,
+        setOtherUserStream,
+        micState,
+        cameraState,
+        handleJoin,
+        userJoined,
+        handleCallClick,
+        handleIncommingCall,
+        sendStream,
+        handleAnswerCall,
+        handleNegotiationNeeded,
+        handleIncomingNegotiation,
+        handleRecievingNegoAns,
+        handleEndCall,
+        handleCallEnded,
+        handleToggle,
+      } = useVideo();
+ 
+   const {socket }= useSocket();
 
   // Negotiations
   useEffect(() => {
@@ -114,7 +36,9 @@ export const Room = () => {
       socket.off("receive-negotiation-answer", handleRecievingNegoAns);
     };
   }, []);
+ 
 
+  //negotiation events
   useEffect(() => {
     peer.peerConnection.addEventListener(
       "negotiationneeded",
@@ -135,7 +59,9 @@ export const Room = () => {
       setOtherUserStream(otherUserStream[0]);
     });
   }, []);
+  
 
+  //video call events 
   useEffect(() => {
     socket.on("join-room", handleJoin);
     socket.on("call-ended", handleCallEnded);
@@ -150,6 +76,8 @@ export const Room = () => {
     };
   }, [socket]);
 
+
+  //sending streams after a delay 
   useEffect(() => {
     if (myStream) {
       setTimeout(() => {
@@ -158,6 +86,7 @@ export const Room = () => {
     }
   }, [myStream]);
 
+  //UI rendering 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-between p-4">
       {/* Header */}
