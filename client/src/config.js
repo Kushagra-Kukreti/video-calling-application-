@@ -1,1 +1,1 @@
-const PRODUCTION_URL = "https://video-calling-application-b3w9.onrender.com"
+export const PRODUCTION_URL = "https://video-calling-application-b3w9.onrender.com"
