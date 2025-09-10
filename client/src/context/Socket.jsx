@@ -12,7 +12,7 @@ export const useSocket = () => {
 };
 export const SocketProvider = ({ children }) => {
   const socket = useMemo(() => {
-    return io(`${HOST}:${PORT_NO}`);
+    return io(PRODUCTION_URL);
   }, []);
   return (
     <SocketContext.Provider value={{socket}}>{children}</SocketContext.Provider>

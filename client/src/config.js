@@ -1,0 +1,1 @@
+const PRODUCTION_URL = "https://video-calling-application-b3w9.onrender.com"
