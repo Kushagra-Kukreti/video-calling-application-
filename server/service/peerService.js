@@ -28,6 +28,11 @@ class PeerService {
   async setRemoteDescription(answer){
         await this.peerConnection.setRemoteDescription(answer);
   }
+
+  async createChannel(channelName){
+      const createdChannel = this.peerConnection.createDataChannel(channelName)
+      return createdChannel;
+  }
 }
 
 export const peer = new PeerService();

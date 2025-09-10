@@ -103,11 +103,11 @@ Core 1-on-1 call flow (stabilize) — Must-have - done
 
 Camera & mic toggles (UX polish) — Easy - done 
 
-Proper End Call / Leave Room (clean disconnect) — Easy → Medium
+Proper End Call / Leave Room (clean disconnect) — Easy → Medium - done
 
-Placeholders, avatars, initials, connection states — Easy
+Placeholders, avatars, initials, connection states — Easy - done 
 
-Text chat + DataChannel file transfer — Medium
+Text chat + DataChannel file transfer — Medium (chat done  - )
 
 Screen sharing (single user) — Medium
 

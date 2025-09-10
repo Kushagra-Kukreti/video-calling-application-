@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "./Socket";
 import { peer } from "../../../server/service/peerService";
@@ -16,6 +16,10 @@ export const VideoProvider = ({ children }) => {
   const [otherUserStream, setOtherUserStream] = useState(null);
   const [micState, setMicState] = useState(false);
   const [cameraState, setCameraState] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const chattingChannel = useRef(null)
+
+  console.log("chat messages",chatMessages)
 
   const handleJoin = (data) => {
     console.log("Your data from backend", data);
@@ -25,12 +29,21 @@ export const VideoProvider = ({ children }) => {
     console.log("Joined user info", data);
     setRemoteSocketId(data.id);
   };
+  const handleReceiveMessage = (event) => {
+    setChatMessages((messages) => [
+      ...messages,
+      { sender: "other", text: event.data },
+    ]);
+  };
 
   const handleCallClick = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
     });
+    const chattingCh = await peer.createChannel("chatting");
+    chattingChannel.current = chattingCh;
+    chattingCh.onmessage = handleReceiveMessage;
     const offer = await peer.getOffer();
     socket.emit("start-call", { to: remoteSocketId, offer });
     setMyStream(stream);
@@ -78,8 +91,8 @@ export const VideoProvider = ({ children }) => {
 
   const handleEndCall = () => {
     // turn off streams
-    myStream?.getTracks().forEach((track) => track.stop()); 
-    peer.peerConnection.close(); 
+    myStream?.getTracks().forEach((track) => track.stop());
+    peer.peerConnection.close();
     // clear states
     setMyStream(null);
     setOtherUserStream(null);
@@ -124,6 +137,9 @@ export const VideoProvider = ({ children }) => {
         setMicState,
         cameraState,
         setCameraState,
+        setChatMessages,
+        chatMessages,
+        chattingChannel,
 
         // handlers
         handleJoin,
@@ -138,6 +154,7 @@ export const VideoProvider = ({ children }) => {
         handleEndCall,
         handleCallEnded,
         handleToggle,
+        handleReceiveMessage,
       }}
     >
       {children}
