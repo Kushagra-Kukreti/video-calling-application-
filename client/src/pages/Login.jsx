@@ -108,7 +108,7 @@ export const Login = () => {
               <input type="text" value={roomId} ref={idRef} className="font-mono bg-gray-200 p-2 rounded"/>
               <button
                 onClick={handleCopy}
-                className="px-2 py-1 disabled:bg-blue-300 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm"
+                className="px-2 py-1 disabled:bg-blue-300 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm cursor-pointer"
                 disabled = {copied}
               >
               {copied?"Copied":"Copy"}
